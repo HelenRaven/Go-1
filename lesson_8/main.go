@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	conf, err := configuration.Load()
+	conf, err := configuration.Load("config.json")
 
 	if err != nil {
 		fmt.Println(err.Error())
