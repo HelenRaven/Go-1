@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,40 +48,27 @@ func Load(fileName ...string) (*Configuration, error) {
 			return &conf, errors.New("cant read config from file")
 		}
 	} else {
-		flag.StringVar(&conf.Port, "port", "", "port")
-		flag.StringVar(&conf.DbUrl, "db_url", "", "database url")
-		flag.StringVar(&conf.JaegerUrl, "jaeger_url", "", "jaeger url")
-		flag.StringVar(&conf.SentryUrl, "sentry_url", "", "sentry url")
-		flag.StringVar(&conf.KafkaBroker, "kafka_broker", "", "kafka broker")
-		flag.StringVar(&conf.AppId, "some_app_id", "", "application id")
-		flag.StringVar(&conf.AppKey, "some_app_key", "", "application key")
-		flag.Parse()
-
 		err := godotenv.Load()
-		if err == nil {
-			if conf.Port == "" {
-				conf.Port = os.Getenv("PORT")
-			}
-			if conf.DbUrl == "" {
-				conf.DbUrl = os.Getenv("db_url")
-			}
-			if conf.JaegerUrl == "" {
-				conf.JaegerUrl = os.Getenv("jaeger_url")
-			}
-			if conf.SentryUrl == "" {
-				conf.SentryUrl = os.Getenv("sentry_url")
-			}
-			if conf.KafkaBroker == "" {
-				conf.KafkaBroker = os.Getenv("kafka_broker")
-			}
-			if conf.AppId == "" {
-				conf.AppId = os.Getenv("some_app_id")
-			}
-			if conf.AppKey == "" {
-				conf.AppKey = os.Getenv("some_app_key")
-			}
+		if err != nil {
+			fmt.Println("There is no .env file with config, you must set config with flags")
+		} else {
+			conf.Port = os.Getenv("PORT")
+			conf.DbUrl = os.Getenv("db_url")
+			conf.JaegerUrl = os.Getenv("jaeger_url")
+			conf.SentryUrl = os.Getenv("sentry_url")
+			conf.KafkaBroker = os.Getenv("kafka_broker")
+			conf.AppId = os.Getenv("some_app_id")
+			conf.AppKey = os.Getenv("some_app_key")
 		}
 	}
+	flag.StringVar(&conf.Port, "port", conf.Port, "port")
+	flag.StringVar(&conf.DbUrl, "db_url", conf.DbUrl, "database url")
+	flag.StringVar(&conf.JaegerUrl, "jaeger_url", conf.JaegerUrl, "jaeger url")
+	flag.StringVar(&conf.SentryUrl, "sentry_url", conf.SentryUrl, "sentry url")
+	flag.StringVar(&conf.KafkaBroker, "kafka_broker", conf.KafkaBroker, "kafka broker")
+	flag.StringVar(&conf.AppId, "some_app_id", conf.AppId, "application id")
+	flag.StringVar(&conf.AppKey, "some_app_key", conf.AppKey, "application key")
+	flag.Parse()
 
 	err := conf.ValidateConf()
 
@@ -88,30 +76,24 @@ func Load(fileName ...string) (*Configuration, error) {
 }
 
 func (conf Configuration) ValidateConf() error {
-	var errString string
 
 	valid, _ := regexp.MatchString(`\d{4}`, conf.Port)
 	if !valid {
-		errString += "Port invalid "
+		return errors.New("port invalid ")
 	}
 
 	if !strings.HasPrefix(conf.DbUrl, "postgres://db-user:db-password@") {
-		errString += "database url invalid "
+		return errors.New("database url invalid ")
 	}
 
 	valid, _ = regexp.MatchString(`http://jaeger:\d{5}`, conf.JaegerUrl)
 	if !valid {
-		errString += "jaeger url invalid "
+		return errors.New("jaeger url invalid ")
 	}
 
 	valid, _ = regexp.MatchString(`http://sentry:\d{4}`, conf.SentryUrl)
 	if !valid {
-		errString += "Sentry url invalid "
+		return errors.New("sentry url invalid ")
 	}
-
-	if errString != "" {
-		return errors.New(errString)
-	} else {
-		return nil
-	}
+	return nil
 }
