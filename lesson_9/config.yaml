@@ -1,0 +1,8 @@
+---
+port: 2030
+db_url: postgres://db-user:db-password@yaml-db:1111/petstore?sslmode=disable
+jaeger_url: http://jaeger:22222
+sentry_url: http://sentry:3333
+kafka_broker: kafka:8877
+some_app_id: testid_yaml
+some_app_key: testkey_yaml

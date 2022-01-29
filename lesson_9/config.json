@@ -1,0 +1,9 @@
+{ 
+    "port": "8080",
+    "db_url": "postgres://db-user:db-password@json-db:4321/petstore?sslmode=disable",
+    "jaeger_url": "http://jaeger:12345",
+    "sentry_url": "http://sentry:5000",
+    "kafka_broker": "kafka:1122",
+    "some_app_id": "testid_json",
+    "some_app_key": "testkey_json"
+}
